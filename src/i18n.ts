@@ -25,6 +25,9 @@ const messages = {
             hideKeybinding: 'Right click',
             hideDescription: 'Hide keypoint',
             flip: 'Flip object',
+            operation: 'Operation',
+            undo: 'Undo',
+            redo: 'Redo',
         }
     },
     zh: {
@@ -51,6 +54,9 @@ const messages = {
             hideKeybinding: '鼠标右键',
             hideDescription: '隐藏关键点',
             flip: '左右翻转',
+            operation: '操作',
+            undo: '撤销',
+            redo: '重做',
         }
     },
     ja: {
@@ -76,6 +82,9 @@ const messages = {
             zoomDescription: 'ズームイン/アウト',
             hideKeybinding: '右クリック',
             hideDescription: 'キーポイントを隠す',
+            operation: '操作',
+            undo: '元に戻す',
+            redo: 'やり直し',
         }
     },
     ko: {
@@ -101,6 +110,9 @@ const messages = {
             zoomDescription: '확대/축소',
             hideKeybinding: '오른쪽 클릭',
             hideDescription: '키포인트 숨기기',
+            operation: '작업',
+            undo: '실행 취소',
+            redo: '다시 실행',
         }
     },
     ru: {
@@ -126,6 +138,9 @@ const messages = {
             zoomDescription: 'Увеличить/уменьшить',
             hideKeybinding: 'Правый клик',
             hideDescription: 'Скрыть ключевую точку',
+            operation: 'Операция',
+            undo: 'Отменить',
+            redo: 'Повторить',
         }
     },
     de: {
@@ -151,6 +166,9 @@ const messages = {
             zoomDescription: 'Vergrößern/Verkleinern',
             hideKeybinding: 'Rechtsklick',
             hideDescription: 'Schlüsselpunkt verbergen',
+            operation: 'Vorgang',
+            undo: 'Rückgängig',
+            redo: 'Wiederherstellen',
         }
     },
     es: {
@@ -176,6 +194,9 @@ const messages = {
             zoomDescription: 'Acercar/Alejar',
             hideKeybinding: 'Clic derecho',
             hideDescription: 'Ocultar punto clave',
+            operation: 'Operación',
+            undo: 'Deshacer',
+            redo: 'Rehacer',
         }
     },
     fr: {
@@ -201,6 +222,9 @@ const messages = {
             zoomDescription: 'Zoomer/Dézoomer',
             hideKeybinding: 'Clic droit',
             hideDescription: 'Masquer le point clé',
+            operation: 'Opération',
+            undo: 'Annuler',
+            redo: 'Rétablir',
         }
     }
 };

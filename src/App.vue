@@ -49,6 +49,9 @@ interface AppData {
 
   // The modal id to post message back to.
   modalId: string | undefined;
+
+  records: Array<IOpenposeJson>;
+  record_ptr: number;
 };
 
 /**
@@ -349,6 +352,8 @@ export default defineComponent({
       activePersonId: undefined,
       activeBodyPart: undefined,
       modalId: undefined,
+      records: [],
+      record_ptr: -1,
     };
   },
   setup() {
@@ -421,14 +426,26 @@ export default defineComponent({
         // Only handles right click events.
         if (event.button !== 3) return;
         if (!(event.target instanceof OpenposeKeypoint2D)) return;
+
+        this.pushRecords();
+
         event.target._visible = false;
 
         this.canvas?.renderAll();
       };
 
+      const recordsPushHandler = (event: fabric.IEvent<MouseEvent>) => {
+        // Only handles left click events.
+        if (event.button !== 1) return;
+        if (!(event.target instanceof OpenposeKeypoint2D)) return;
+
+        this.pushRecords();
+      };
+
       this.canvas.on('object:moving', keypointMoveHandler);
       this.canvas.on('object:scaling', keypointMoveHandler);
       this.canvas.on('object:rotating', keypointMoveHandler);
+      this.canvas.on('mouse:up', recordsPushHandler);
       this.canvas.on('selection:created', selectionHandler);
       this.canvas.on('selection:cleared', selectionHandler);
       this.canvas.on('selection:updated', selectionHandler);
@@ -531,6 +548,7 @@ export default defineComponent({
     addDefaultPerson() {
       const newPerson = new OpenposePerson(null, new OpenposeBody(default_body_keypoints));
       this.addPerson(newPerson);
+      this.pushRecords();
     },
     removePerson(person: OpenposePerson) {
       // If the person is active right now, deactivate it.
@@ -545,6 +563,10 @@ export default defineComponent({
         this.keypointMap.delete(keypoint.id);
       });
       this.canvas?.renderAll();
+    },
+    removePersonPushRecords(person: OpenposePerson) {
+      this.removePerson(person);
+      this.pushRecords();
     },
     addDefaultObject(person: OpenposePerson, part: OpenposeBodyPart) {
       let target: OpenposeObject;
@@ -1014,6 +1036,35 @@ export default defineComponent({
         link.click();
       });
     },
+    undo() {
+      if (this.record_ptr <= 0) {
+        return ;
+      }
+      this.clearCanvas();
+      this.record_ptr--;
+      this.loadPeopleFromJson(this.records[this.record_ptr]);
+    },
+    redo() {
+      if (this.record_ptr >= this.records.length - 1) {
+        return ;
+      }
+      this.clearCanvas();
+      this.record_ptr++;
+      this.loadPeopleFromJson(this.records[this.record_ptr]);
+    },
+    pushRecords() {
+      const max_length = 50;
+      if (this.records.length !== this.record_ptr+1) {
+        this.records.splice(this.record_ptr+1);
+        this.record_ptr = this.records.length-1;
+      }
+      if (this.records.length >= max_length) {
+        this.records.shift();
+        this.record_ptr--;
+      }
+      this.records.push(this.getCanvasAsOpenposeJson());
+      this.record_ptr++;
+    }
   },
   components: {
     PlusSquareOutlined,
@@ -1054,6 +1105,17 @@ export default defineComponent({
           <a-button @click="resizeOpenposeCanvas(canvasWidth, canvasHeight)">{{ $t('ui.resizeCanvas') }}</a-button>
           <a-button @click="resetZoom()">{{ $t('ui.resetZoom') }}</a-button>
         </a-space>
+      </div>
+      <a-divider orientation="left" orientation-margin="0px">
+        {{ $t('ui.operation') }}
+      </a-divider>
+      <div>
+        <a-button @click="undo()" v-bind:disabled="record_ptr <= 0">
+          {{ $t('ui.undo') }}
+        </a-button>
+        <a-button @click="redo()" v-bind:disabled="record_ptr >= records.length - 1">
+          {{ $t('ui.redo') }}
+        </a-button>
       </div>
       <a-divider orientation="left" orientation-margin="0px">
         {{ $t('ui.backgroundImage') }}
@@ -1101,7 +1163,7 @@ export default defineComponent({
       </a-space>
       <a-collapse accordion :activeKey="activePersonId" @update:activeKey="updateActivePerson">
         <OpenposeObjectPanel v-for="person in people.values()" :object="person.body" :display_name="person.name"
-          @removeObject="removePerson(person)" :key="person.id">
+          @removeObject="removePersonPushRecords(person)" :key="person.id">
           <template #extra-control>
             <!-- TODO: make this repetitive code a component. -->
             <div v-if="person.left_hand === undefined && !person.isAnimal">
